@@ -1,0 +1,240 @@
+.hero {
+  --mark: min(35svh, 64vw, 400px);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100svh;
+  padding-block: calc(var(--nav-h) + var(--space-lg)) var(--space-2xl);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+
+  &[data-dragging] {
+    cursor: grabbing;
+  }
+
+  &[data-static] {
+    cursor: auto;
+  }
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* 로고가 놓이는 정사각형 자리. 캔버스는 회전 여유를 두고 이보다 크게 깔립니다. */
+.stage {
+  position: relative;
+  width: var(--mark);
+  aspect-ratio: 1;
+  margin-bottom: var(--space-xl);
+  pointer-events: none;
+}
+
+/*
+ * 로고 뒤의 오로라: 넓게 깔린 청록빛 위로 초록 띠와 보랏빛 띠가 아주 느리게 흔들립니다.
+ * 가장자리는 마스크로 지워서 슬로건 뒤까지는 번지지 않습니다.
+ */
+.aurora {
+  position: absolute;
+  inset: -34% -115% -6%;
+  z-index: -1;
+  /* 가늘고 넓은 빛 띠 셋: 초록, 청록, 보랏빛 */
+  background:
+    radial-gradient(
+      ellipse 30% 9% at 34% 40%,
+      var(--aurora-1),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 28% 8% at 66% 30%,
+      var(--aurora-2),
+      transparent 72%
+    ),
+    radial-gradient(ellipse 24% 8% at 60% 62%, var(--aurora-3), transparent 72%);
+  filter: blur(36px) saturate(1.2);
+  opacity: 0;
+  -webkit-mask: radial-gradient(
+    ellipse 50% 50% at 50% 46%,
+    var(--color-paper) 30%,
+    transparent 100%
+  );
+  mask: radial-gradient(
+    ellipse 50% 50% at 50% 46%,
+    var(--color-paper) 30%,
+    transparent 100%
+  );
+  transition: opacity 2.4s var(--ease-out);
+
+  .hero[data-ready] & {
+    opacity: 0.68;
+  }
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    animation: sway-a 19s var(--ease-in-out) infinite alternate;
+  }
+
+  /* 초록 띠: 로고 뒤를 비스듬히 가로질러 */
+  &::before {
+    left: 16%;
+    top: 34%;
+    width: 68%;
+    height: 14%;
+    background: radial-gradient(
+      ellipse at 50% 50%,
+      var(--aurora-1),
+      transparent 70%
+    );
+    rotate: -14deg;
+  }
+
+  /* 보랏빛 띠: 반대 방향으로, 조금 아래에 */
+  &::after {
+    left: 30%;
+    top: 50%;
+    width: 52%;
+    height: 12%;
+    background: radial-gradient(
+      ellipse at 50% 50%,
+      var(--aurora-3),
+      transparent 70%
+    );
+    rotate: 10deg;
+    animation-name: sway-b;
+    animation-duration: 23s;
+  }
+
+  .hero[data-idle] &::before,
+  .hero[data-idle] &::after {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes sway-a {
+  from {
+    transform: translate3d(-6%, 4%, 0) scale(0.94);
+  }
+
+  to {
+    transform: translate3d(7%, -5%, 0) scale(1.08);
+  }
+}
+
+@keyframes sway-b {
+  from {
+    transform: translate3d(5%, -3%, 0) scale(1.06);
+  }
+
+  to {
+    transform: translate3d(-8%, 5%, 0) scale(0.92);
+  }
+}
+
+.canvas {
+  position: absolute;
+  inset: -35%;
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out);
+
+  .hero[data-ready] & {
+    opacity: 1;
+  }
+}
+
+.fallback {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    var(--holo-1),
+    var(--holo-2) 30%,
+    var(--holo-3) 55%,
+    var(--holo-4) 78%,
+    var(--holo-5)
+  );
+  -webkit-mask: url('/brand/Logo_W.svg') center / contain no-repeat;
+  mask: url('/brand/Logo_W.svg') center / contain no-repeat;
+}
+
+.slogan {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: var(--text-display);
+  line-height: 1;
+  letter-spacing: -0.005em;
+  max-width: none;
+  text-wrap: initial;
+  cursor: default;
+}
+
+.line {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.04em;
+
+  > span {
+    display: block;
+    animation: rise 0.8s var(--ease-out) both;
+  }
+
+  & + & > span {
+    animation-delay: 60ms;
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+.lede {
+  margin-top: var(--space-lg);
+  font-size: var(--text-lead);
+  color: var(--color-muted);
+  cursor: default;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-xl);
+}
+
+@media (max-width: 860px) {
+  .hero {
+    --mark: min(34svh, 66vw);
+    padding-block: calc(var(--nav-h) + var(--space-lg)) var(--space-xl);
+  }
+
+  .lede {
+    max-width: 22ch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line > span {
+    animation: none;
+  }
+
+  .canvas,
+  .aurora {
+    transition: none;
+  }
+
+  .aurora::before,
+  .aurora::after {
+    animation: none;
+  }
+}
